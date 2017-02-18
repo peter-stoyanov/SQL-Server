@@ -30,18 +30,86 @@ where t.Price < 5000 and t.Class = 'First'
 order by t.TicketID asc
 
 
-select distinct c.CustomerID,FirstName + ' ' + LastName as FullName, t.TownName as HomeTown
-from Customers c
-inner join Towns t
-on c.HomeTownID = t.TownID
-inner join Tickets tc
-on tc.CustomerID = c.CustomerID
-inner join Flights f
-on tc.FlightID = f.FlightID
-inner join Airports ar
-on ar.TownID = t.TownID
-where c.HomeTownID = f.OriginAirportID
+--softuni solution
+--Extract all Customers which are departing from their Home Town
+select distinct c.CustomerID,FirstName + ' '+LastName as FullName,tw.TownName from Flights as f
+join Tickets as t
+on t.FlightID = f.FlightID
+join Customers c
+on c.CustomerID = t.CustomerID
+join Towns tw
+on c.HomeTownID = tw.TownID
+join Airports a
+on a.AirportID = f.OriginAirportID
+where c.HomeTownID = a.TownID
 order by CustomerID asc
 
 select * from Flights
+
+--Extract all Customers which will fly
+select Distinct c.CustomerID,
+    FirstName+' '+LastName as FullName,
+    DATEDIFF(year,c.DateOfBirth,'20160101') as Age
+from Customers c
+join Tickets t
+on t.CustomerID = c.CustomerID
+join Flights f
+on f.FlightID = t.FlightID
+and f.Status = 'Departing'
+order by Age, CustomerID
+
+
+--Extract Top 3 Customers which have Delayed Flights
+select top(3) c.CustomerID,
+    FirstName + ' ' + LastName as FullName,
+    t.Price as TicketPrice,
+    a.AirportName
+from Customers c
+join Tickets t
+on t.CustomerID = c.CustomerID
+join Flights f
+on t.FlightID = f.FlightID
+and f.Status = 'Delayed'
+join Airports a
+on f.DestinationAirportID = a.AirportID
+order by t.Price desc, c.CustomerID asc
+
+
+--Extract the Last 5 Flights, which are departing
+Select * from 
+(
+select top 5 f.FlightID,f.DepartureTime,f.ArrivalTime, a.AirportName as Origin,ap.AirportName as Destination
+from Flights f
+join Airports a
+on f.OriginAirportID = a.AirportID
+join Airports ap
+on f.DestinationAirportID = ap.AirportID
+where f.Status = 'Departing'
+order by f.DepartureTime desc, f.FlightID asc
+) as filter
+order by DepartureTime asc, FlightID
+
+--Extract all Customers below 21 years, which have already flew at least once
+select distinct c.CustomerID,
+        FirstName + ' ' + LastName as FullName,
+        DATEDIFF(year,c.DateOfBirth,'20160101') as Age
+from Customers c
+join Tickets t
+on t.CustomerID = c.CustomerID
+join Flights f
+on t.FlightID = f.FlightID
+and f.Status = 'Arrived'
+where DATEDIFF(year,c.DateOfBirth,'20160101') < 21
+order by Age desc, c.CustomerID asc
+
+--Extract all Airports and the Count of People departing from them
+
+select a.AirportID,a.AirportName,COUNT(t.CustomerID) as Passengers
+from Airports a
+join Flights f
+on f.OriginAirportID = a.AirportID
+and f.Status = 'Departing'
+join Tickets t
+on t.FlightID = f.FlightID
+group by a.AirportID,a.AirportName
 

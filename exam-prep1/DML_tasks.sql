@@ -71,6 +71,18 @@ From Airlines
 order by Rating DESC
 )
 
+update Tickets
+set Price *= 1.5
+where FlightID IN
+(
+    select FlightID from Flights
+    where AirlineID = 
+        (
+            select top 1 AirlineID from Airlines
+            order by Rating desc
+        )
+)
+
 CREATE TABLE CustomerReviews(
 ReviewID INT Primary Key,
 ReviewContent VARCHAR(255) not null,
