@@ -1,0 +1,6 @@
+constraint_type,constraint_name,delete_action,update_action,status_enabled,status_for_replication,constraint_keys
+FOREIGN KEY,FKProductIngred_Products,No Action,No Action,Enabled,Is_For_Replication,ProductId
+" "," "," "," "," "," ",REFERENCES Bakery2.dbo.Products (Id)
+FOREIGN KEY,PK_ProductIngred_Ingred,No Action,No Action,Enabled,Is_For_Replication,IngredientId
+" "," "," "," "," "," ",REFERENCES Bakery2.dbo.Ingredients (Id)
+PRIMARY KEY (clustered),PK_ProductsIngred,(n/a),(n/a),(n/a),(n/a),"ProductId, IngredientId"
